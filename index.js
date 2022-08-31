@@ -127,7 +127,7 @@ app.get("/neumonologia", (req, res) => {
     
 });
 app.get("/postear", (req, res) => {
-    if(login== "true"){
+    if(login){
         res.status(200).render("postPrueba", { isLogin: isLogin, login: login });
     }
     else{
