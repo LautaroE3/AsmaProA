@@ -4,7 +4,6 @@ const path = require("path");
 const morgan = require("morgan");
 const cloudinary = require("cloudinary").v2;
 const cors = require("cors");
-const session = require('express-session');
 var cookieParser = require('cookie-parser');
 //Base de Datos
 const mongoose = require("mongoose");
@@ -16,16 +15,10 @@ const bcrypt = require("bcrypt");
 const { stringify } = require("querystring");
 
 //variables globales para el logeo y los sweetsalert
-global.idPosts= 1;
+global.idPosts= 0;
 global.isLogin = 0;
-global.login = false;
+global.login= false;
 
-app.use(session({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: true }
-}));
 app.use(cookieParser());
 //vistas
 app.set("view engine", "ejs");
@@ -35,15 +28,6 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(cors());
 //Middlewares
-app.use(
-    session({
-        secret: "keyboard cat",
-        resave: false,
-        saveUninitialized: true,
-        cookie: { secure: true },
-    })
-);
-
 
 app.use(morgan("dev"));
 //Middleware para poder obtener data de los requests con BodyParser
@@ -75,15 +59,15 @@ app.post("/login", (req, res) => {
             if(req.body.usuario==docs[0].usuario){
                 bcrypt.compare(req.body.contraseña,bcrypt.hashSync(docs[0].contraseña, 5),(err, resul) => {
 
-                    console.log(docs[0].contraseña);
-                    
-
+                    if(idPosts>0){
+                        PostModel.findOne().sort({id: -1}).exec(function(err, post) {idPosts=post.id+1;});
+                    }
                     if (err) throw err;
 
                     if (resul) {
-                        res.cookie("Login", "true");
+                        res.cookie("Login", true);
+                        login= req.cookies.Login;
                         isLogin = 1;
-                        console.log("EL USUARIO SE LOGUEO")
                         res.status(200).render("edicionPosteos", {data:PostModel.find()});
                         
                     } else {
@@ -103,7 +87,8 @@ app.post("/login", (req, res) => {
 });
 
 app.get('/seccionAdmin', (req, res) => {
-    if(req.cookies.Login== "true"){
+    if(login){
+        
         res.status(200).render("edicionPosteos", {data:PostModel.find()});
 
     }
@@ -142,11 +127,7 @@ app.get("/neumonologia", (req, res) => {
     
 });
 app.get("/postear", (req, res) => {
-    if(req.cookies.Login== "true"){
-        PostModel.findOne().sort({id: -1}).exec(function(err, post) {   
-            console.log("Ultimo Id:"+post.id.toString());
-                idPosts=post.id+1;
-            });
+    if(login== "true"){
         res.status(200).render("postPrueba", { isLogin: isLogin, login: login });
     }
     else{
@@ -176,7 +157,10 @@ app.post("/subirpost", (req, res) => {
         post.save((err,db)=>{
             if(err) console.error(err);
             console.log("se guardo un posteo");
-
+            PostModel.findOne().sort({id: -1}).exec(function(err, post) {   
+                console.log("Ultimo Id:"+post.id.toString());
+                    idPosts=post.id+1;
+                });
             })
             res.status(200).render("edicionPosteos", {data:PostModel.find()});
             
@@ -185,7 +169,7 @@ app.post("/subirpost", (req, res) => {
 
 
 app.get("/config", (req, res) => {
-    if(req.cookies.Login== "true"){
+    if(login){
         res.status(200).render("config");
     }
     else{
@@ -195,7 +179,7 @@ app.get("/config", (req, res) => {
 
 app.post("/ChangeDatos", (req, res) => {
     res.status(200).render("login");
-    if (req.cookies.Login== "true") {
+    if (login) {
         Admin.findOneAndUpdate({ nombre: "admin" },
 { $set: { contraseña: req.body.contraseña } }, { new: true }, function (err, doc) {
                 if (err) console.log("Error ", err);

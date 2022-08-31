@@ -17,13 +17,10 @@
     {
         let map = new Microsoft.Maps.Map('#myMap', {
             center: new Microsoft.Maps.Location(-31.39896246974225, -64.19744430043583),
-            zoom: 17    
+            zoom: 15    
         });
         let center = map.getCenter();
-
-        let pin = new Microsoft.Maps.Pushpin(center, {
-            icon: 'images/LOGO.png',
-        });
+        let pin = new Microsoft.Maps.Pushpin(center, {text:'+'});
 
         map.entities.push(pin);
     }
