@@ -5,6 +5,9 @@ const morgan = require("morgan");
 const cloudinary = require("cloudinary").v2;
 const cors = require("cors");
 var cookieParser = require('cookie-parser');
+global.idPosts= 0;
+global.isLogin = 0;
+global.login= false;
 //Base de Datos
 const mongoose = require("mongoose");
 const Admin = require("./models/myModel");
@@ -15,9 +18,7 @@ const bcrypt = require("bcrypt");
 const { stringify } = require("querystring");
 
 //variables globales para el logeo y los sweetsalert
-global.idPosts= 0;
-global.isLogin = 0;
-global.login= false;
+
 
 app.use(cookieParser());
 //vistas
