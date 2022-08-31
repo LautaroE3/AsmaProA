@@ -64,9 +64,15 @@ app.post("/login", (req, res) => {
             if(req.body.usuario==docs[0].usuario){
                 bcrypt.compare(req.body.contraseña,bcrypt.hashSync(docs[0].contraseña, 5),(err, resul) => {
 
+<<<<<<< HEAD
                     if(idPosts>0){
                         PostModel.findOne().sort({id: -1}).exec(function(err, post) {idPosts=post.id+1;});
                     }
+=======
+                    console.log(docs[0].contraseña);
+                    console.log("EL USUARIO SE LOGUEO")
+
+>>>>>>> parent of d8d8016 (ArreglosVarios)
                     if (err) throw err;
 
                     if (resul) {
@@ -74,9 +80,12 @@ app.post("/login", (req, res) => {
                         res.session = true;
                         login = res.session;
                         isLogin = 1;
+<<<<<<< HEAD
                         console.log(login);
+=======
+>>>>>>> parent of d8d8016 (ArreglosVarios)
                         res.status(200).render("edicionPosteos", {data:PostModel.find()});
-                        
+
                     } else {
 
                         isLogin = 2;
@@ -96,7 +105,6 @@ app.post("/login", (req, res) => {
 app.get('/seccionAdmin', (req, res) => {
     if(login){
         res.status(200).render("edicionPosteos", {data:PostModel.find()});
-
     }
     else{
         res.redirect("/login");
@@ -105,8 +113,8 @@ app.get('/seccionAdmin', (req, res) => {
 
 app.get("/logout", (req, res) => {
     if (login) {
+        login = false;
         req.session.destroy();   
-        login = req.session;
         res.redirect("/");
     } else {
         res.redirect("/");
