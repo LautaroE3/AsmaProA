@@ -30,12 +30,10 @@ app.set("views", path.join(__dirname, "views"));
 app.use(cors());
 app.use(cookieParser());
 //Middlewares
-app.use(
-    session({
+app.use(session({
         secret: "keyboard cat",
-        resave: false,
-        saveUninitialized: true,
-        cookie: { secure: true },
+        resave: true,
+        saveUninitialized: true, 
     })
 );
 
