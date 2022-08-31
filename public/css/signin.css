@@ -1,0 +1,60 @@
+body {
+    background: linear-gradient(-45deg, #2a3586, #c1c5d1, #295386, #000000);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    height: 100vh;
+}
+
+@keyframes gradient {
+    0% { 
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.card{
+    margin: -50px;
+    margin-top: 250px;
+    width: 500px;
+    border-radius: 25px;
+}
+.header-title {
+    text-align: center;
+    margin-left:5px;
+    margin-bottom: 5px;
+    font-family: url(https://fonts.googleapis.com/css?family=Roboto:300,400,700&display=swap);
+}
+
+.login-form .form-control {
+    margin-left:45px;
+    width: 350px;
+    position: center;
+    border-radius: 0;
+    margin-bottom: 20px;
+}
+
+.form-group-button{
+    margin-left: 10px;
+}
+
+
+.login-form .btn {
+    border-radius: 0;
+    -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.login-form .btn.btn-primary {
+    margin-left: 105px;
+    border-radius: 3px;
+    width: 200px;
+    background:#30499B ;
+    border-color:#30499B ;
+
+}

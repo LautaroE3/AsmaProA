@@ -4,27 +4,22 @@ const path = require("path");
 const morgan = require("morgan");
 const cloudinary = require("cloudinary").v2;
 const cors = require("cors");
-const session = require('express-session');
-
+const session = require("cookie-session");
+var cookieParser = require('cookie-parser');
 //Base de Datos
 const mongoose = require("mongoose");
 const Admin = require("./models/myModel");
 const PostModel = require("./models/postModel");
-global.login= false;
-global.isLogin=0;
-global.idPosts=0;
+
 //hash
 const bcrypt = require("bcrypt");
 const { stringify } = require("querystring");
 
 //variables globales para el logeo y los sweetsalert
+global.isLogin = 0;
+global.login = false;
+global.idPosts= 1;
 
-app.use(session({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: true }
-}));
 
 //vistas
 app.set("view engine", "ejs");
@@ -33,7 +28,17 @@ app.set("views", path.join(__dirname, "views"));
 
 
 app.use(cors());
+app.use(cookieParser());
 //Middlewares
+app.use(
+    session({
+        secret: "keyboard cat",
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: true },
+    })
+);
+
 
 app.use(morgan("dev"));
 //Middleware para poder obtener data de los requests con BodyParser
@@ -48,7 +53,16 @@ app.listen(port, () => {
     console.log(`Servidor corriendo en el puerto ${port} correctamente`);
 });
 //Conexión al cloud de Mongodb Atlas ...
-mongoose.connect("mongodb+srv://hrgarcia:EaFhXeNfxbG277Zz@cluster0.fs8tm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",{useNewUrlParser: true,}).then((con) => {console.log("Conectado a la DB");});
+mongoose
+    .connect(
+        "mongodb+srv://hrgarcia:EaFhXeNfxbG277Zz@cluster0.fs8tm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+        {
+            useNewUrlParser: true,
+        }
+    )
+    .then((con) => {
+        console.log("Conectado a la DB");
+    });
 //controlador principal
 app.get("/", (req, res) => {
     res.status(200).render("index", { login: login, isLogin: isLogin });
@@ -62,14 +76,12 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
         Admin.find({ usuario: req.body.usuario }, (err, docs) => {
             if(req.body.usuario==docs[0].usuario){
-                bcrypt.compare(req.body.contraseña,bcrypt.hashSync(docs[0].contraseña, 5),(err, resul) => {
-                    if(idPosts>0){
-                        PostModel.findOne().sort({id: -1}).exec(function(err, post) {idPosts=post.id+1;});
-                    }
+
+            bcrypt.compare(req.body.contraseña,bcrypt.hashSync(docs[0].contraseña, 5),(err, resul) => {
 
                     console.log(docs[0].contraseña);
-                    console.log("EL USUARIO SE LOGUEO")
-
+                    res.cookie("Login" , true, {expire : new Date() + 9999});
+                    console.log("Cookies :  ", req.cookies.Login);
                     if (err) throw err;
 
                     if (resul) {
@@ -77,7 +89,6 @@ app.post("/login", (req, res) => {
                         res.session = true;
                         login = res.session;
                         isLogin = 1;
-                        console.log(login);                                                                                                                                                                                                                                                 
                         res.status(200).render("edicionPosteos", {data:PostModel.find()});
 
                     } else {
@@ -97,8 +108,8 @@ app.post("/login", (req, res) => {
 });
 
 app.get('/seccionAdmin', (req, res) => {
-    if(login){
-        res.status(200).render("edicionPosteos", {data:PostModel.find()});
+    if(req.cookies.Login){
+        res.status(200).render("edicionPosteos", {data:PostModel.find()});   
     }
     else{
         res.redirect("/login");
@@ -106,10 +117,10 @@ app.get('/seccionAdmin', (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-    if (login) {
+    if (req.cookies.Login) {
         login = false;
+        clearCookie("pepito");
         req.session.destroy();   
-        login = req.session;
         res.redirect("/");
     } else {
         res.redirect("/");
@@ -168,9 +179,9 @@ app.post("/subirpost", (req, res) => {
             if(err) console.error(err);
             console.log("se guardo un posteo");
             PostModel.findOne().sort({id: -1}).exec(function(err, post) {   
-                console.log("Ultimo Id:"+post.id.toString());
-                    idPosts=post.id+1;
-                });
+            console.log("Ultimo Id:"+post.id.toString());
+                idPosts=post.id+1;
+            });
             })
             res.status(200).render("edicionPosteos", {data:PostModel.find()});
             
@@ -179,7 +190,7 @@ app.post("/subirpost", (req, res) => {
 
 
 app.get("/config", (req, res) => {
-    if(login){
+    if(req.cookies.Login){
         res.status(200).render("config");
     }
     else{
@@ -189,7 +200,7 @@ app.get("/config", (req, res) => {
 
 app.post("/ChangeDatos", (req, res) => {
     res.status(200).render("login");
-    if (login) {
+    if (req.cookies.Login) {
         Admin.findOneAndUpdate({ nombre: "admin" },
 { $set: { contraseña: req.body.contraseña } }, { new: true }, function (err, doc) {
                 if (err) console.log("Error ", err);
