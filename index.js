@@ -77,7 +77,7 @@ app.post("/login", (req, res) => {
                         res.session = true;
                         login = res.session;
                         isLogin = 1;
-                        console.log(login);
+                        console.log(login);                                                                                                                                                                                                                                                 
                         res.status(200).render("edicionPosteos", {data:PostModel.find()});
 
                     } else {
@@ -107,8 +107,13 @@ app.get('/seccionAdmin', (req, res) => {
 
 app.get("/logout", (req, res) => {
     if (login) {
+<<<<<<< HEAD
         login = false;
         req.session.destroy();   
+=======
+        req.session.destroy();   
+        login = req.session;
+>>>>>>> parent of 87d0762 (Login ARREGLADO)
         res.redirect("/");
     } else {
         res.redirect("/");
