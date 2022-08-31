@@ -5,16 +5,17 @@ const morgan = require("morgan");
 const cloudinary = require("cloudinary").v2;
 const cors = require("cors");
 const session = require("cookie-session");
+const BodyParser= require('body-parser');
 var cookieParser = require('cookie-parser');
 //Base de Datos
 const mongoose = require("mongoose");
 const Admin = require("./models/myModel");
 const PostModel = require("./models/postModel");
-
+const Administrador=require("./models/Admin");
 //hash
 const bcrypt = require("bcrypt");
 const { stringify } = require("querystring");
-
+const mongo_uri='mongodb+srv://hrgarcia:EaFhXeNfxbG277Zz@cluster0.fs8tm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
 //variables globales para el logeo y los sweetsalert
 global.isLogin = 0;
 global.login = false;
@@ -37,7 +38,7 @@ app.use(session({
     })
 );
 
-
+app.use(BodyParser.json());
 app.use(morgan("dev"));
 //Middleware para poder obtener data de los requests con BodyParser
 app.use(express.json());
@@ -51,18 +52,17 @@ app.listen(port, () => {
     console.log(`Servidor corriendo en el puerto ${port} correctamente`);
 });
 //Conexión al cloud de Mongodb Atlas ...
-mongoose
-    .connect(
-        "mongodb+srv://hrgarcia:EaFhXeNfxbG277Zz@cluster0.fs8tm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-        {
-            useNewUrlParser: true,
-        }
-    )
-    .then((con) => {
-        console.log("Conectado a la DB");
-    });
+mongoose.connect(mongo_uri,function(err){
+    if(err){
+        throw err;
+    } else{
+        console.log(`Successfully connected to ${mongo_uri}`);
+    }
+});
 //controlador principal
 app.get("/", (req, res) => {
+    req.session.usuario= 'Doctor';
+    req.session.rol='Admin';
     res.status(200).render("index", { login: login, isLogin: isLogin });
 });
 
@@ -70,9 +70,32 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
     res.status(200).render("login", { isLogin: isLogin, login: login });
 });
+app.post('/register',(req,res)=>{
+    const {username,password}=req.body;
 
+    const Admins = new Administrador({username,password});
+
+    Admins.save(err=>{
+        if(err){
+            res.status(500).send('ERROR AL REGISTRAR USUARIO');
+        }else{
+            res.status(200).send('USUARIO REGISTRADO');
+        }
+    });
+});
 app.post("/login", (req, res) => {
-        Admin.find({ usuario: req.body.usuario }, (err, docs) => {
+        const {username,password}=req.body;
+        Admins.findOne({username},(err,user)=>{
+            if(err){
+                res.status(500).send('ERROR AL AUTENTICAR AL USUARIO');
+            }else if(!admin){
+                res.status(500).send('EL USUARIO NO EXISTE');
+            }else{
+                admin
+            }
+        });
+
+        Admins.find({ usuario: req.body.usuario }, (err, docs) => {
             if(req.body.usuario==docs[0].usuario){
 
             bcrypt.compare(req.body.contraseña,bcrypt.hashSync(docs[0].contraseña, 5),(err, resul) => {

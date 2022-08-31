@@ -1,7 +1,6 @@
 //Modelo de ejemplo para alojar datos en una DB mongo
 const mongoose = require("mongoose");
 const validator = require("validator");
-
 //Creación del Schema Admin
 const Admin = new mongoose.Schema({
     nombre: {
