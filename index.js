@@ -60,7 +60,6 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-
         Admin.find({ usuario: req.body.usuario }, (err, docs) => {
             if(req.body.usuario==docs[0].usuario){
                 bcrypt.compare(req.body.contraseña,bcrypt.hashSync(docs[0].contraseña, 5),(err, resul) => {
