@@ -100,6 +100,8 @@ app.get('/seccionAdmin', (req, res) => {
 
 app.get("/logout", (req, res) => {
     if (login) {
+        res.cookie("Login", false);
+        login= req.cookies.Login;
         clearCookie("Login");
         res.redirect("/");
     } else {
@@ -128,7 +130,7 @@ app.get("/neumonologia", (req, res) => {
     
 });
 app.get("/postear", (req, res) => {
-    if(req.cookies.Login){
+    if(login){
         res.status(200).render("postPrueba", { isLogin: isLogin, login: login });
     }
     else{
