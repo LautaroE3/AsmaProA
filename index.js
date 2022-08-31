@@ -68,6 +68,7 @@ app.post("/login", (req, res) => {
                         res.cookie("Login", true);
                         login= req.cookies.Login;
                         isLogin = 1;
+                        console.log(login);
                         res.status(200).render("edicionPosteos", {data:PostModel.find()});
                         
                     } else {
@@ -127,7 +128,7 @@ app.get("/neumonologia", (req, res) => {
     
 });
 app.get("/postear", (req, res) => {
-    if(login){
+    if(req.cookies.Login){
         res.status(200).render("postPrueba", { isLogin: isLogin, login: login });
     }
     else{
