@@ -107,13 +107,9 @@ app.get('/seccionAdmin', (req, res) => {
 
 app.get("/logout", (req, res) => {
     if (login) {
-<<<<<<< HEAD
         login = false;
         req.session.destroy();   
-=======
-        req.session.destroy();   
         login = req.session;
->>>>>>> parent of 87d0762 (Login ARREGLADO)
         res.redirect("/");
     } else {
         res.redirect("/");
