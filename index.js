@@ -5,12 +5,14 @@ const morgan = require("morgan");
 const cloudinary = require("cloudinary").v2;
 const cors = require("cors");
 const session = require('express-session');
-var cookieParser = require('cookie-parser');
+
 //Base de Datos
 const mongoose = require("mongoose");
 const Admin = require("./models/myModel");
 const PostModel = require("./models/postModel");
-
+global.login= false;
+global.isLogin=0;
+global.idPosts=0;
 //hash
 const bcrypt = require("bcrypt");
 const { stringify } = require("querystring");
@@ -23,7 +25,7 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: true }
 }));
-app.use(cookieParser());
+
 //vistas
 app.set("view engine", "ejs");
 //Defino la localización de mis vistas
@@ -69,7 +71,9 @@ app.post("/login", (req, res) => {
                     if (err) throw err;
 
                     if (resul) {
-                        res.cookie("Login", "true");
+
+                        res.session = true;
+                        login = res.session;
                         isLogin = 1;
                         console.log(login);
                         res.status(200).render("edicionPosteos", {data:PostModel.find()});
@@ -91,7 +95,7 @@ app.post("/login", (req, res) => {
 });
 
 app.get('/seccionAdmin', (req, res) => {
-    if(req.cookies.Login== "true"){
+    if(login){
         res.status(200).render("edicionPosteos", {data:PostModel.find()});
 
     }
@@ -102,7 +106,8 @@ app.get('/seccionAdmin', (req, res) => {
 
 app.get("/logout", (req, res) => {
     if (login) {
-        clearCookie("Login");
+        req.session.destroy();   
+        login = req.session;
         res.redirect("/");
     } else {
         res.redirect("/");
@@ -130,7 +135,7 @@ app.get("/neumonologia", (req, res) => {
     
 });
 app.get("/postear", (req, res) => {
-    if(req.cookies.Login== "true"){
+    if(login){
         res.status(200).render("postPrueba", { isLogin: isLogin, login: login });
     }
     else{
