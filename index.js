@@ -5,7 +5,7 @@ const morgan = require("morgan");
 const cloudinary = require("cloudinary").v2;
 const cors = require("cors");
 const session = require('express-session');
-
+var cookieParser = require('cookie-parser');
 //Base de Datos
 const mongoose = require("mongoose");
 const Admin = require("./models/myModel");
@@ -26,7 +26,7 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: true }
 }));
-
+app.use(cookieParser());
 //vistas
 app.set("view engine", "ejs");
 //Defino la localización de mis vistas
@@ -63,10 +63,10 @@ mongoose.connect("mongodb+srv://hrgarcia:EaFhXeNfxbG277Zz@cluster0.fs8tm.mongodb
 app.get("/", (req, res) => {
     res.status(200).render("index", { login: login, isLogin: isLogin });
 });
-
 //Controlador de Admin
 app.get("/login", (req, res) => {
     res.status(200).render("login", { isLogin: isLogin, login: login });
+
 });
 
 app.post("/login", (req, res) => {
@@ -81,9 +81,7 @@ app.post("/login", (req, res) => {
                     if (err) throw err;
 
                     if (resul) {
-
-                        res.session = true;
-                        login = res.session;
+                        res.cookie("Login", "true");
                         isLogin = 1;
                         console.log("EL USUARIO SE LOGUEO")
                         res.status(200).render("edicionPosteos", {data:PostModel.find()});
@@ -105,7 +103,7 @@ app.post("/login", (req, res) => {
 });
 
 app.get('/seccionAdmin', (req, res) => {
-    if(login){
+    if(req.cookies.Login== "true"){
         res.status(200).render("edicionPosteos", {data:PostModel.find()});
 
     }
@@ -116,8 +114,7 @@ app.get('/seccionAdmin', (req, res) => {
 
 app.get("/logout", (req, res) => {
     if (login) {
-        req.session.destroy();   
-        login = req.session;
+        clearCookie("Login");
         res.redirect("/");
     } else {
         res.redirect("/");
@@ -145,7 +142,7 @@ app.get("/neumonologia", (req, res) => {
     
 });
 app.get("/postear", (req, res) => {
-    if(login){
+    if(req.cookies.Login== "true"){
         res.status(200).render("postPrueba", { isLogin: isLogin, login: login });
     }
     else{
@@ -187,7 +184,7 @@ app.post("/subirpost", (req, res) => {
 
 
 app.get("/config", (req, res) => {
-    if(login){
+    if(req.cookies.Login== "true"){
         res.status(200).render("config");
     }
     else{
@@ -197,7 +194,7 @@ app.get("/config", (req, res) => {
 
 app.post("/ChangeDatos", (req, res) => {
     res.status(200).render("login");
-    if (login) {
+    if (req.cookies.Login== "true") {
         Admin.findOneAndUpdate({ nombre: "admin" },
 { $set: { contraseña: req.body.contraseña } }, { new: true }, function (err, doc) {
                 if (err) console.log("Error ", err);
