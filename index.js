@@ -143,6 +143,10 @@ app.get("/neumonologia", (req, res) => {
 });
 app.get("/postear", (req, res) => {
     if(req.cookies.Login== "true"){
+        PostModel.findOne().sort({id: -1}).exec(function(err, post) {   
+            console.log("Ultimo Id:"+post.id.toString());
+                idPosts=post.id+1;
+            });
         res.status(200).render("postPrueba", { isLogin: isLogin, login: login });
     }
     else{
@@ -172,10 +176,7 @@ app.post("/subirpost", (req, res) => {
         post.save((err,db)=>{
             if(err) console.error(err);
             console.log("se guardo un posteo");
-            PostModel.findOne().sort({id: -1}).exec(function(err, post) {   
-            console.log("Ultimo Id:"+post.id.toString());
-                idPosts=post.id+1;
-            });
+
             })
             res.status(200).render("edicionPosteos", {data:PostModel.find()});
             
